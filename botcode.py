@@ -21,6 +21,8 @@ connection = psycopg2.connect(host='#database host',
                         password='#database password')
 cursor = connection.cursor()
 
+ID = #chat id of your bot logger group
+
 def news(update,context):
     #store
     cursor.execute("""INSERT INTO messages (message_id,chat_id,date) VALUES (%s,%s,%s);""",(str(update.message.message_id),str(update.message.chat_id),str(update.message.date)))
@@ -89,7 +91,7 @@ def memes(update,context):
                 hold = False
                 
             except Exception as error:
-                bot.sendMessage(chat_id = -1001527969554, text = 'error while sending:'+str(random_post.url)+'error: '+error)
+                bot.sendMessage(chat_id = ID, text = 'error while sending:'+str(random_post.url)+'error: '+error)
                 innerCount = 0
                 random_post=posts[random.randint(0, 49)]
                 while (not random_post.url.endswith(tuple([".jpg",".png",".gif"])))or(random_post.stickied)or(random_post.over_18 == True) and (innerCount>5):
@@ -146,7 +148,7 @@ def handle_message(update,context):
     
 #deletor multithread
 def deletor():
-    bot.sendMessage(chat_id = -1001527969554, text = 'multithreading started....')
+    bot.sendMessage(chat_id = ID, text = 'multithreading started....')
     while True:
         try:
             #grabs the first entry from database
@@ -160,30 +162,30 @@ def deletor():
                 bot.deleteMessage(str(record[1]),int(record[0]))
                 cursor.execute("""DELETE FROM messages WHERE message_id = %s AND chat_id = %s;""",(str(record[0]),str(record[1])))
                 connection.commit()
-                bot.sendMessage(chat_id = -1001527969554, text = 'Deleted '+str(record[0])+','+str(record[1])[::2])
+                bot.sendMessage(chat_id = ID, text = 'Deleted '+str(record[0])+','+str(record[1])[::2])
                 time.sleep(30)
             else:
-                bot.sendMessage(chat_id = -1001527969554, text = str(int(elapsed.total_seconds())))
+                bot.sendMessage(chat_id = ID, text = str(int(elapsed.total_seconds())))
                 time.sleep(300)
             #exception handling
         except TelegramError as e:
-            bot.sendMessage(chat_id = -1001527969554, text = 'Telegram:- '+str(e))
+            bot.sendMessage(chat_id = ID, text = 'Telegram:- '+str(e))
             cursor.execute("""DELETE FROM messages WHERE message_id = %s AND chat_id = %s;""",(str(record[0]),str(record[1])))
             connection.commit()
             time.sleep(60)
         except Exception as error:
             if str(error)=="""'NoneType' object is not subscriptable""":
-                bot.sendMessage(chat_id = -1001527969554, text = 'Empty.')
+                bot.sendMessage(chat_id = ID, text = 'Empty.')
                 time.sleep(600)
             else:
-                bot.sendMessage(chat_id = -1001527969554, text = str(error))
+                bot.sendMessage(chat_id = ID, text = str(error))
                 time.sleep(60)
             
 def main():
     try:
         updater = Updater(API_KEY, use_context = True)
         dp = updater.dispatcher
-        bot.sendMessage(chat_id = -1001527969554, text = 'Bot started...')
+        bot.sendMessage(chat_id = ID, text = 'Bot started...')
         
         dp.add_handler(CommandHandler("news",news))
         dp.add_handler(CommandHandler("jokes",memes))
@@ -199,7 +201,7 @@ def main():
         updater.start_polling()
         updater.idle()
     except Exception as error:
-        bot.sendMessage(chat_id = -1001527969554, text = 'BOT ERROR:-'+str(error))
+        bot.sendMessage(chat_id = ID, text = 'BOT ERROR:-'+str(error))
         
 threadObj = threading.Thread(target = deletor)
 threadObj.start()
